@@ -1,0 +1,1842 @@
+#! /Applications/Nuke12.1v1/Nuke12.1v1.app/Contents/MacOS/libnuke-12.1.1.dylib -nx
+#write_info Write1 file:"../images/LMT.Academy.Analytic_3_comparison_v001.png" format:"1944 556 1" chans:":rgba.red:rgba.green:rgba.blue:" framerange:"1 100" fps:"0" colorspace:"Output - sRGB" datatype:"8 bit" transfer:"unknown" views:"main" colorManagement:"OCIO"
+version 12.1 v1
+define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
+<layout version="1.0">
+    <window x="0" y="23" w="1920" h="1077" maximized="1" screen="0">
+        <splitter orientation="1">
+            <split size="40"/>
+            <dock id="" hideTitles="1" activePageId="Toolbar.1">
+                <page id="Toolbar.1"/>
+            </dock>
+            <split size="1257" stretch="1"/>
+            <splitter orientation="2">
+                <split size="620"/>
+                <dock id="" activePageId="Viewer.3">
+                    <page id="Viewer.2"/>
+                    <page id="Viewer.3"/>
+                    <page id="Viewer.1"/>
+                </dock>
+                <split size="437"/>
+                <dock id="" activePageId="DAG.1" focus="true">
+                    <page id="DAG.1"/>
+                    <page id="Curve Editor.1"/>
+                    <page id="DopeSheet.1"/>
+                    <page id="DAG.3"/>
+                    <page id="DAG.4"/>
+                    <page id="DAG.2"/>
+                </dock>
+            </splitter>
+            <split size="615"/>
+            <dock id="" activePageId="Properties.1">
+                <page id="Properties.1"/>
+                <page id="uk.co.thefoundry.backgroundrenderview.1"/>
+            </dock>
+        </splitter>
+    </window>
+</layout>
+}
+Root {
+ inputs 0
+ name /Users/alex/GitHub/NukeAnalyticLMTs/nuke/LMT.Academy.Analytic_3.nk
+ project_directory "\[python \{nuke.script_directory()\}]"
+ format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
+ proxy_type scale
+ proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+ colorManagement OCIO
+ OCIO_config aces_1.1
+ customOCIOConfigPath /Applications/Nuke11.2v4/Nuke11.2v4.app/Contents/MacOS/plugins/OCIOConfigs/configs/aces_1.0.3/config.ocio
+ defaultViewerLUT "OCIO LUTs"
+ workingSpaceLUT scene_linear
+ monitorLut ACES/sRGB
+ int8Lut matte_paint
+ int16Lut texture_paint
+ logLut compositing_log
+ floatLut scene_linear
+}
+BackdropNode {
+ inputs 0
+ name BackdropNode1
+ tile_color 0x71c67100
+ label LMT.Academy.Analytic_3
+ note_font_size 42
+ xpos 337
+ ypos -136
+ bdheight 581
+}
+Read {
+ inputs 0
+ file_type exr
+ file ../images/SonyF35.StillLife.exr
+ format "1920 1080 0 0 1920 1080 1 HD_1080"
+ origset true
+ version 2
+ colorspace default
+ name Read1
+ xpos 347
+ ypos -285
+}
+set N1c5f2800 [stack 0]
+OCIOColorSpace {
+ in_colorspace scene_linear
+ out_colorspace default
+ name OCIOColorSpace1
+ xpos 347
+ ypos -56
+}
+Group {
+ name scale_C
+ xpos 347
+ ypos -30
+ addUserKnob {20 User}
+ addUserKnob {7 percentC}
+ percentC 0.7
+}
+ StickyNote {
+  inputs 0
+  name StickyNote1
+  label "type note hereconst float RGB_2_YAB_MAT\[3]\[3] = \{\n  \{1./3., 1./2., 0.0\},\n  \{1./3., -1./4.,  sqrt3over4\},\n  \{1./3., -1./4., -sqrt3over4\}\n\};"
+  xpos 644
+  ypos -149
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote2
+  label "<justify=left>float\[3] yab_2_ych( float yab\[3])\n\{\n  float ych\[3] = yab;\n\n  ych\[1] = sqrt( pow( yab\[1], 2.) + pow( yab\[2], 2.) );\n\n  ych\[2] = atan2( yab\[2], yab\[1] ) * (180.0 / M_PI);\n  if (ych\[2] < 0.0) ych\[2] = ych\[2] + 360.;\n\n  return ych;\n\}"
+  xpos 652
+  ypos -80
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote3
+  label "float\[3] ych_2_yab( float ych\[3] ) \n\{\n  float yab\[3];\n  yab\[0] = ych\[0];\n\n  float h = ych\[2] * (M_PI / 180.0);\n  yab\[1] = ych\[1]*cos(h);\n  yab\[2] = ych\[1]*sin(h);\n\n  return yab;\n\}"
+  xpos 685
+  ypos 63
+ }
+ Input {
+  inputs 0
+  name Input1
+  xpos 481
+  ypos -107
+ }
+ ColorMatrix {
+  matrix {
+      {{1/3} {1/3} {1/3}}
+      {{1/2} {-1/4} {-1/4}}
+      {0 {sqrt3over4} {-sqrt3over4}}
+    }
+  name ColorMatrix1
+  label rgb_2_yab
+  xpos 481
+  ypos -67
+  addUserKnob {20 User}
+  addUserKnob {7 sqrt3over4 t sqrt(3.)/4}
+  sqrt3over4 0.4330127019
+ }
+ Expression {
+  temp_name0 M_PI
+  temp_expr0 3.14159265358979323846264338327950288
+  temp_name1 ych2
+  temp_expr1 "(180.0 / M_PI) * atan2( b, g )"
+  expr0 r
+  expr1 "sqrt( pow( g, 2) + pow( b, 2) )"
+  channel2 {-rgba.red rgba.green rgba.blue none}
+  expr2 "ych2 < 0.0?ych2 + 360:ych2"
+  name Expression1
+  label yab_2_ych
+  xpos 481
+  ypos -35
+ }
+ Multiply {
+  value {1 {parent.percentC} 1 1}
+  name Multiply1
+  selected true
+  xpos 481
+  ypos -3
+ }
+ Expression {
+  temp_name0 M_PI
+  temp_expr0 3.14159265358979323846264338327950288
+  temp_name1 h
+  temp_expr1 "b * (M_PI / 180.0)"
+  expr1 g*cos(h)
+  expr2 g*sin(h)
+  name Expression2
+  label ych_2_yab
+  xpos 481
+  ypos 29
+ }
+ ColorMatrix {
+  matrix {
+      {{1/3} {1/3} {1/3}}
+      {{1/2} {-1/4} {-1/4}}
+      {0 {sqrt3over4} {-sqrt3over4}}
+    }
+  invert true
+  name ColorMatrix2
+  label rgb_2_yab
+  xpos 481
+  ypos 61
+  addUserKnob {20 User}
+  addUserKnob {7 sqrt3over4 t sqrt(3.)/4}
+  sqrt3over4 0.4330127019
+ }
+ Output {
+  name Output1
+  xpos 481
+  ypos 161
+ }
+end_group
+OCIOColorSpace {
+ in_colorspace default
+ out_colorspace "ACES - ACEScct"
+ name OCIOColorSpace3
+ xpos 347
+ ypos -6
+}
+OCIOCDLTransform {
+ slope {1 1 0.94}
+ offset {0 0 0.02}
+ working_space data
+ name OCIOCDLTransform1
+ xpos 347
+ ypos 15
+}
+OCIOColorSpace {
+ in_colorspace "ACES - ACEScct"
+ out_colorspace default
+ name OCIOColorSpace4
+ xpos 347
+ ypos 39
+}
+Group {
+ name gamma_adjust_linear
+ xpos 347
+ ypos 81
+ addUserKnob {20 User}
+ addUserKnob {41 GAMMA T Expression1.GAMMA}
+}
+ Input {
+  inputs 0
+  name Input1
+  selected true
+  xpos 383
+  ypos 38
+ }
+ Expression {
+  temp_name0 PIVOT
+  temp_expr0 0.18
+  temp_name1 SCALAR
+  temp_expr1 "PIVOT / pow( PIVOT, GAMMA)"
+  expr0 "(r > 0)?pow( r, GAMMA) * SCALAR:r"
+  expr1 "(g > 0)?pow( g, GAMMA) * SCALAR:g"
+  expr2 "(b > 0)?pow( b, GAMMA) * SCALAR:b"
+  name Expression1
+  label gamma_adjust_linear
+  xpos 383
+  ypos 126
+  addUserKnob {20 User}
+  addUserKnob {7 GAMMA R 0 4}
+  GAMMA 1.5
+ }
+ Output {
+  name Output1
+  xpos 383
+  ypos 226
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote1
+  label "float\[3] gamma_adjust_linear( \n    float rgbIn\[3], \n    uniform float GAMMA, \n    uniform float PIVOT = 0.18\n)\n\{\n    const float SCALAR = PIVOT / pow( PIVOT, GAMMA);\n\n    float rgbOut\[3] = rgbIn;\n    if (rgbIn\[0] > 0) rgbOut\[0] = pow( rgbIn\[0], GAMMA) * SCALAR;\n    if (rgbIn\[1] > 0) rgbOut\[1] = pow( rgbIn\[1], GAMMA) * SCALAR;\n    if (rgbIn\[2] > 0) rgbOut\[2] = pow( rgbIn\[2], GAMMA) * SCALAR;\n\n    return rgbOut;\n\}"
+  xpos 509
+  ypos 75
+ }
+end_group
+Group {
+ name rotate_H_in_H
+ label "centerH: \[value centerH]\nwidthH: \[value widthH]\ndegressShift: \[value degreesShift]"
+ xpos 347
+ ypos 105
+ addUserKnob {20 User}
+ addUserKnob {7 centerH R 0 360}
+ addUserKnob {7 widthH R 0 360}
+ widthH 30
+ addUserKnob {7 degreesShift R -180 180}
+ degreesShift 5
+}
+ StickyNote {
+  inputs 0
+  name StickyNote1
+  label "type note hereconst float RGB_2_YAB_MAT\[3]\[3] = \{\n  \{1./3., 1./2., 0.0\},\n  \{1./3., -1./4.,  sqrt3over4\},\n  \{1./3., -1./4., -sqrt3over4\}\n\};"
+  xpos 651
+  ypos -244
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote2
+  label "<justify=left>float\[3] yab_2_ych( float yab\[3])\n\{\n  float ych\[3] = yab;\n\n  ych\[1] = sqrt( pow( yab\[1], 2.) + pow( yab\[2], 2.) );\n\n  ych\[2] = atan2( yab\[2], yab\[1] ) * (180.0 / M_PI);\n  if (ych\[2] < 0.0) ych\[2] = ych\[2] + 360.;\n\n  return ych;\n\}"
+  xpos 648
+  ypos -186
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote3
+  label "float\[3] ych_2_yab( float ych\[3] ) \n\{\n  float yab\[3];\n  yab\[0] = ych\[0];\n\n  float h = ych\[2] * (M_PI / 180.0);\n  yab\[1] = ych\[1]*cos(h);\n  yab\[2] = ych\[1]*sin(h);\n\n  return yab;\n\}"
+  xpos 694
+  ypos -34
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote4
+  label "<justify=left>float center_hue( float hue, float centerH)\n\{\n  float hueCentered = hue - centerH;\n  if (hueCentered < -180.) hueCentered = hueCentered + 360.;\n  else if (hueCentered > 180.) hueCentered = hueCentered - 360.;\n  return hueCentered;\n\}"
+  xpos 864
+  ypos 5
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote5
+  label "<justift=left>float uncenter_hue( float hueCentered, float centerH)\n\{\n  float hue = hueCentered + centerH;\n  if (hue < 0.) hue = hue + 360.;\n  else if (hue > 360.) hue = hue - 360.;\n  return hue;\n\}\n"
+  xpos 829
+  ypos 114
+ }
+ Input {
+  inputs 0
+  name Input1
+  xpos 556
+  ypos -180
+ }
+ ColorMatrix {
+  matrix {
+      {{1/3} {1/3} {1/3}}
+      {{1/2} {-1/4} {-1/4}}
+      {0 {sqrt3over4} {-sqrt3over4}}
+    }
+  name ColorMatrix1
+  label rgb_2_yab
+  xpos 556
+  ypos -143
+  addUserKnob {20 User}
+  addUserKnob {7 sqrt3over4 t sqrt(3.)/4}
+  sqrt3over4 0.4330127019
+ }
+ Expression {
+  temp_name0 M_PI
+  temp_expr0 3.14159265358979323846264338327950288
+  temp_name1 ych2
+  temp_expr1 "(180.0 / M_PI) * atan2( b, g )"
+  expr0 r
+  expr1 "sqrt( pow( g, 2) + pow( b, 2) )"
+  channel2 {-rgba.red rgba.green rgba.blue none}
+  expr2 "ych2 < 0.0?ych2 + 360:ych2"
+  name Expression1
+  label yab_2_ych
+  xpos 556
+  ypos -114
+ }
+set Nd87d2000 [stack 0]
+ Expression {
+  temp_name0 hueCentered
+  temp_expr0 "b - centerH"
+  temp_name1 l1
+  temp_expr1 "(hueCentered < -180.)?hueCentered + 360 : hueCentered"
+  temp_name2 l2
+  temp_expr2 "(l1 > 180.)?l1 - 360 : l1"
+  expr2 l2
+  name center_hue
+  xpos 481
+  ypos -76
+  addUserKnob {20 User}
+  addUserKnob {7 centerH R 0 360}
+  centerH {{parent.centerH}}
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  fromInput2 {{0} B}
+  mappings "4 rgba.blue 0 2 rgba.blue 0 2 rgba.alpha 0 3 rgba.alpha 0 3 rgba.blue 0 2 rgba.green 0 1 rgba.blue 0 2 rgba.red 0 0"
+  name Shuffle1
+  selected true
+  xpos 424
+  ypos -33
+ }
+set N7caa000 [stack 0]
+ Expression {
+  temp_name0 centeredHue
+  temp_expr0 g
+  temp_name1 knot_coord
+  temp_expr1 "(centeredHue - knots0) * 4.0/\[value w]"
+  temp_name2 j
+  temp_expr2 int(knot_coord)
+  temp_name3 t
+  temp_expr3 "knot_coord - j"
+  channel0 {-rgba.red -rgba.green rgba.blue -rgba.alpha}
+  expr0 "(min((centeredHue > knots0?1:0) , (centeredHue < knots4?1:0))  ?   j == 3 ? t*t*t * -1./6 + t*t * 3./6 +  t * -3./6 + 1 * 1./6 : j == 2 ? t*t*t * 3./6 + t*t * -6./6 + t * 0./6 + 1. *4./6 : j == 1 ? t*t*t * -3./6 + t*t * 3./6 + t * 3./6 + 1. * 1./6 : j == 0 ? t*t*t * 1./6 + t*t * 0./6 + t * 0./6 + 1. * 0./6 : 0   :  0) * 3/2"
+  channel1 none
+  expr1 "min((centeredHue > knots0?1:0) , (centeredHue < knots4?1:0))"
+  channel2 none
+  expr2 int(knot_coord)
+  name cubic_basis_shaper
+  label "line 47"
+  xpos 424
+  ypos 13
+  addUserKnob {20 User}
+  addUserKnob {7 w}
+  w {{parent.widthH}}
+  addUserKnob {7 knots0}
+  knots0 {{-w/2}}
+  addUserKnob {7 knots1}
+  knots1 {{-w/4}}
+  addUserKnob {7 knots2}
+  addUserKnob {7 knots3}
+  knots3 {{w/4}}
+  addUserKnob {7 knots4}
+  knots4 {{w/2}}
+ }
+ Dot {
+  name Dot1
+  label "f_H\n"
+  xpos 458
+  ypos 61
+ }
+set N18f99c00 [stack 0]
+ Expression {
+  channel0 rgba
+  expr0 b>0
+  name Expression3
+  xpos 424
+  ypos 121
+ }
+push $N18f99c00
+push $N7caa000
+ Dot {
+  name Dot2
+  label old_hue
+  xpos 545
+  ypos 1
+ }
+set N18f99800 [stack 0]
+ Add {
+  value {{parent.degreesShift}}
+  name new_hue
+  xpos 574
+  ypos 22
+ }
+set N18f99400 [stack 0]
+push $N18f99800
+ Keymix {
+  inputs 3
+  maskChannel rgba.blue
+  name Keymix1
+  xpos 511
+  ypos 75
+ }
+set N18f99000 [stack 0]
+push $Nd87d2000
+ Copy {
+  inputs 2
+  from2 rgba.blue
+  to2 rgba.blue
+  name Copy1
+  xpos 620
+  ypos 85
+ }
+ Expression {
+  temp_name0 hue
+  temp_expr0 "b + centerH"
+  temp_name1 l1
+  temp_expr1 "hue < 0 ? hue + 360 : hue"
+  temp_name2 l2
+  temp_expr2 "l1 > 360 ?l1 - 360:l1"
+  expr2 l2
+  name uncenter_hue1
+  xpos 620
+  ypos 127
+  addUserKnob {20 User}
+  addUserKnob {7 centerH R 0 360}
+  centerH {{parent.centerH}}
+ }
+push $Nd87d2000
+ Keymix {
+  inputs 3
+  name Keymix2
+  xpos 588
+  ypos 162
+ }
+ Expression {
+  temp_name0 M_PI
+  temp_expr0 3.14159265358979323846264338327950288
+  temp_name1 h
+  temp_expr1 "b * (M_PI / 180.0)"
+  expr1 g*cos(h)
+  expr2 g*sin(h)
+  name Expression2
+  label ych_2_yab
+  xpos 592
+  ypos 202
+ }
+ ColorMatrix {
+  matrix {
+      {{1/3} {1/3} {1/3}}
+      {{1/2} {-1/4} {-1/4}}
+      {0 {sqrt3over4} {-sqrt3over4}}
+    }
+  invert true
+  name ColorMatrix2
+  label rgb_2_yab
+  xpos 607
+  ypos 236
+  addUserKnob {20 User}
+  addUserKnob {7 sqrt3over4 t sqrt(3.)/4}
+  sqrt3over4 0.4330127019
+ }
+ Output {
+  name Output1
+  xpos 607
+  ypos 286
+ }
+push $N18f99400
+push $N18f99000
+ Viewer {
+  inputs 2
+  frame_range 1-100
+  colour_sample_bbox {-0.6447916627 0.1958333403 -0.6437500119 0.196875006}
+  viewerProcess "sRGB (ACES)"
+  name Viewer1
+  xpos 651
+  ypos -18
+ }
+end_group
+Group {
+ name rotate_H_in_H1
+ label "centerH: \[value centerH]\nwidthH: \[value widthH]\ndegressShift: \[value degreesShift]"
+ xpos 347
+ ypos 157
+ addUserKnob {20 User}
+ addUserKnob {7 centerH R 0 360}
+ centerH 80
+ addUserKnob {7 widthH R 0 360}
+ widthH 60
+ addUserKnob {7 degreesShift R -180 180}
+ degreesShift -15
+}
+ StickyNote {
+  inputs 0
+  name StickyNote1
+  label "type note hereconst float RGB_2_YAB_MAT\[3]\[3] = \{\n  \{1./3., 1./2., 0.0\},\n  \{1./3., -1./4.,  sqrt3over4\},\n  \{1./3., -1./4., -sqrt3over4\}\n\};"
+  xpos 651
+  ypos -244
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote2
+  label "<justify=left>float\[3] yab_2_ych( float yab\[3])\n\{\n  float ych\[3] = yab;\n\n  ych\[1] = sqrt( pow( yab\[1], 2.) + pow( yab\[2], 2.) );\n\n  ych\[2] = atan2( yab\[2], yab\[1] ) * (180.0 / M_PI);\n  if (ych\[2] < 0.0) ych\[2] = ych\[2] + 360.;\n\n  return ych;\n\}"
+  xpos 648
+  ypos -186
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote3
+  label "float\[3] ych_2_yab( float ych\[3] ) \n\{\n  float yab\[3];\n  yab\[0] = ych\[0];\n\n  float h = ych\[2] * (M_PI / 180.0);\n  yab\[1] = ych\[1]*cos(h);\n  yab\[2] = ych\[1]*sin(h);\n\n  return yab;\n\}"
+  xpos 694
+  ypos -34
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote4
+  label "<justify=left>float center_hue( float hue, float centerH)\n\{\n  float hueCentered = hue - centerH;\n  if (hueCentered < -180.) hueCentered = hueCentered + 360.;\n  else if (hueCentered > 180.) hueCentered = hueCentered - 360.;\n  return hueCentered;\n\}"
+  xpos 864
+  ypos 5
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote5
+  label "<justift=left>float uncenter_hue( float hueCentered, float centerH)\n\{\n  float hue = hueCentered + centerH;\n  if (hue < 0.) hue = hue + 360.;\n  else if (hue > 360.) hue = hue - 360.;\n  return hue;\n\}\n"
+  xpos 829
+  ypos 114
+ }
+ Input {
+  inputs 0
+  name Input1
+  xpos 556
+  ypos -180
+ }
+ ColorMatrix {
+  matrix {
+      {{1/3} {1/3} {1/3}}
+      {{1/2} {-1/4} {-1/4}}
+      {0 {sqrt3over4} {-sqrt3over4}}
+    }
+  name ColorMatrix1
+  label rgb_2_yab
+  xpos 556
+  ypos -143
+  addUserKnob {20 User}
+  addUserKnob {7 sqrt3over4 t sqrt(3.)/4}
+  sqrt3over4 0.4330127019
+ }
+ Expression {
+  temp_name0 M_PI
+  temp_expr0 3.14159265358979323846264338327950288
+  temp_name1 ych2
+  temp_expr1 "(180.0 / M_PI) * atan2( b, g )"
+  expr0 r
+  expr1 "sqrt( pow( g, 2) + pow( b, 2) )"
+  channel2 {-rgba.red rgba.green rgba.blue none}
+  expr2 "ych2 < 0.0?ych2 + 360:ych2"
+  name Expression1
+  label yab_2_ych
+  xpos 556
+  ypos -114
+ }
+set Nbb08f800 [stack 0]
+ Expression {
+  temp_name0 hueCentered
+  temp_expr0 "b - centerH"
+  temp_name1 l1
+  temp_expr1 "(hueCentered < -180.)?hueCentered + 360 : hueCentered"
+  temp_name2 l2
+  temp_expr2 "(l1 > 180.)?l1 - 360 : l1"
+  expr2 l2
+  name center_hue
+  xpos 481
+  ypos -76
+  addUserKnob {20 User}
+  addUserKnob {7 centerH R 0 360}
+  centerH {{parent.centerH}}
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  fromInput2 {{0} B}
+  mappings "4 rgba.blue 0 2 rgba.blue 0 2 rgba.alpha 0 3 rgba.alpha 0 3 rgba.blue 0 2 rgba.green 0 1 rgba.blue 0 2 rgba.red 0 0"
+  name Shuffle1
+  xpos 424
+  ypos -33
+ }
+set Nbb08f000 [stack 0]
+ Expression {
+  temp_name0 centeredHue
+  temp_expr0 g
+  temp_name1 knot_coord
+  temp_expr1 "(centeredHue - knots0) * 4.0/\[value w]"
+  temp_name2 j
+  temp_expr2 int(knot_coord)
+  temp_name3 t
+  temp_expr3 "knot_coord - j"
+  channel0 {-rgba.red -rgba.green rgba.blue -rgba.alpha}
+  expr0 "(min((centeredHue > knots0?1:0) , (centeredHue < knots4?1:0))  ?   j == 3 ? t*t*t * -1./6 + t*t * 3./6 +  t * -3./6 + 1 * 1./6 : j == 2 ? t*t*t * 3./6 + t*t * -6./6 + t * 0./6 + 1. *4./6 : j == 1 ? t*t*t * -3./6 + t*t * 3./6 + t * 3./6 + 1. * 1./6 : j == 0 ? t*t*t * 1./6 + t*t * 0./6 + t * 0./6 + 1. * 0./6 : 0   :  0) * 3/2"
+  channel1 none
+  expr1 "min((centeredHue > knots0?1:0) , (centeredHue < knots4?1:0))"
+  channel2 none
+  expr2 int(knot_coord)
+  name cubic_basis_shaper
+  label "line 47"
+  xpos 424
+  ypos 13
+  addUserKnob {20 User}
+  addUserKnob {7 w}
+  w {{parent.widthH}}
+  addUserKnob {7 knots0}
+  knots0 {{-w/2}}
+  addUserKnob {7 knots1}
+  knots1 {{-w/4}}
+  addUserKnob {7 knots2}
+  addUserKnob {7 knots3}
+  knots3 {{w/4}}
+  addUserKnob {7 knots4}
+  knots4 {{w/2}}
+ }
+ Dot {
+  name Dot1
+  label "f_H\n"
+  xpos 458
+  ypos 61
+ }
+set Nbb08e800 [stack 0]
+ Expression {
+  channel0 rgba
+  expr0 b>0
+  name Expression3
+  xpos 424
+  ypos 121
+ }
+push $Nbb08e800
+push $Nbb08f000
+ Dot {
+  name Dot2
+  label old_hue
+  xpos 545
+  ypos 1
+ }
+set Nbb08e000 [stack 0]
+ Add {
+  value {{parent.degreesShift}}
+  name new_hue
+  xpos 574
+  ypos 22
+ }
+set Nf8cb1c00 [stack 0]
+push $Nbb08e000
+ Keymix {
+  inputs 3
+  maskChannel rgba.blue
+  name Keymix1
+  xpos 511
+  ypos 75
+ }
+set Nf8cb1800 [stack 0]
+push $Nbb08f800
+ Copy {
+  inputs 2
+  from2 rgba.blue
+  to2 rgba.blue
+  name Copy1
+  xpos 620
+  ypos 85
+ }
+ Expression {
+  temp_name0 hue
+  temp_expr0 "b + centerH"
+  temp_name1 l1
+  temp_expr1 "hue < 0 ? hue + 360 : hue"
+  temp_name2 l2
+  temp_expr2 "l1 > 360 ?l1 - 360:l1"
+  expr2 l2
+  name uncenter_hue1
+  xpos 620
+  ypos 127
+  addUserKnob {20 User}
+  addUserKnob {7 centerH R 0 360}
+  centerH {{parent.centerH}}
+ }
+push $Nbb08f800
+ Keymix {
+  inputs 3
+  name Keymix2
+  xpos 588
+  ypos 162
+ }
+ Expression {
+  temp_name0 M_PI
+  temp_expr0 3.14159265358979323846264338327950288
+  temp_name1 h
+  temp_expr1 "b * (M_PI / 180.0)"
+  expr1 g*cos(h)
+  expr2 g*sin(h)
+  name Expression2
+  label ych_2_yab
+  xpos 592
+  ypos 202
+ }
+ ColorMatrix {
+  matrix {
+      {{1/3} {1/3} {1/3}}
+      {{1/2} {-1/4} {-1/4}}
+      {0 {sqrt3over4} {-sqrt3over4}}
+    }
+  invert true
+  name ColorMatrix2
+  label rgb_2_yab
+  xpos 607
+  ypos 236
+  addUserKnob {20 User}
+  addUserKnob {7 sqrt3over4 t sqrt(3.)/4}
+  sqrt3over4 0.4330127019
+ }
+ Output {
+  name Output1
+  xpos 607
+  ypos 286
+ }
+push $Nf8cb1c00
+push $Nf8cb1800
+ Viewer {
+  inputs 2
+  frame_range 1-100
+  colour_sample_bbox {-0.6447916627 0.1958333403 -0.6437500119 0.196875006}
+  viewerProcess "sRGB (ACES)"
+  name Viewer1
+  xpos 651
+  ypos -18
+ }
+end_group
+Group {
+ name rotate_H_in_H2
+ label "centerH: \[value centerH]\nwidthH: \[value widthH]\ndegressShift: \[value degreesShift]"
+ xpos 347
+ ypos 209
+ addUserKnob {20 User}
+ addUserKnob {7 centerH R 0 360}
+ centerH 52
+ addUserKnob {7 widthH R 0 360}
+ widthH 50
+ addUserKnob {7 degreesShift R -180 180}
+ degreesShift -14
+}
+ StickyNote {
+  inputs 0
+  name StickyNote1
+  label "type note hereconst float RGB_2_YAB_MAT\[3]\[3] = \{\n  \{1./3., 1./2., 0.0\},\n  \{1./3., -1./4.,  sqrt3over4\},\n  \{1./3., -1./4., -sqrt3over4\}\n\};"
+  xpos 651
+  ypos -244
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote2
+  label "<justify=left>float\[3] yab_2_ych( float yab\[3])\n\{\n  float ych\[3] = yab;\n\n  ych\[1] = sqrt( pow( yab\[1], 2.) + pow( yab\[2], 2.) );\n\n  ych\[2] = atan2( yab\[2], yab\[1] ) * (180.0 / M_PI);\n  if (ych\[2] < 0.0) ych\[2] = ych\[2] + 360.;\n\n  return ych;\n\}"
+  xpos 648
+  ypos -186
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote3
+  label "float\[3] ych_2_yab( float ych\[3] ) \n\{\n  float yab\[3];\n  yab\[0] = ych\[0];\n\n  float h = ych\[2] * (M_PI / 180.0);\n  yab\[1] = ych\[1]*cos(h);\n  yab\[2] = ych\[1]*sin(h);\n\n  return yab;\n\}"
+  xpos 694
+  ypos -34
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote4
+  label "<justify=left>float center_hue( float hue, float centerH)\n\{\n  float hueCentered = hue - centerH;\n  if (hueCentered < -180.) hueCentered = hueCentered + 360.;\n  else if (hueCentered > 180.) hueCentered = hueCentered - 360.;\n  return hueCentered;\n\}"
+  xpos 864
+  ypos 5
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote5
+  label "<justift=left>float uncenter_hue( float hueCentered, float centerH)\n\{\n  float hue = hueCentered + centerH;\n  if (hue < 0.) hue = hue + 360.;\n  else if (hue > 360.) hue = hue - 360.;\n  return hue;\n\}\n"
+  xpos 829
+  ypos 114
+ }
+ Input {
+  inputs 0
+  name Input1
+  xpos 556
+  ypos -180
+ }
+ ColorMatrix {
+  matrix {
+      {{1/3} {1/3} {1/3}}
+      {{1/2} {-1/4} {-1/4}}
+      {0 {sqrt3over4} {-sqrt3over4}}
+    }
+  name ColorMatrix1
+  label rgb_2_yab
+  xpos 556
+  ypos -143
+  addUserKnob {20 User}
+  addUserKnob {7 sqrt3over4 t sqrt(3.)/4}
+  sqrt3over4 0.4330127019
+ }
+ Expression {
+  temp_name0 M_PI
+  temp_expr0 3.14159265358979323846264338327950288
+  temp_name1 ych2
+  temp_expr1 "(180.0 / M_PI) * atan2( b, g )"
+  expr0 r
+  expr1 "sqrt( pow( g, 2) + pow( b, 2) )"
+  channel2 {-rgba.red rgba.green rgba.blue none}
+  expr2 "ych2 < 0.0?ych2 + 360:ych2"
+  name Expression1
+  label yab_2_ych
+  xpos 556
+  ypos -114
+ }
+set Nba896000 [stack 0]
+ Expression {
+  temp_name0 hueCentered
+  temp_expr0 "b - centerH"
+  temp_name1 l1
+  temp_expr1 "(hueCentered < -180.)?hueCentered + 360 : hueCentered"
+  temp_name2 l2
+  temp_expr2 "(l1 > 180.)?l1 - 360 : l1"
+  expr2 l2
+  name center_hue
+  xpos 481
+  ypos -76
+  addUserKnob {20 User}
+  addUserKnob {7 centerH R 0 360}
+  centerH {{parent.centerH}}
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  fromInput2 {{0} B}
+  mappings "4 rgba.blue 0 2 rgba.blue 0 2 rgba.alpha 0 3 rgba.alpha 0 3 rgba.blue 0 2 rgba.green 0 1 rgba.blue 0 2 rgba.red 0 0"
+  name Shuffle1
+  xpos 424
+  ypos -33
+ }
+set N68285800 [stack 0]
+ Expression {
+  temp_name0 centeredHue
+  temp_expr0 g
+  temp_name1 knot_coord
+  temp_expr1 "(centeredHue - knots0) * 4.0/\[value w]"
+  temp_name2 j
+  temp_expr2 int(knot_coord)
+  temp_name3 t
+  temp_expr3 "knot_coord - j"
+  channel0 {-rgba.red -rgba.green rgba.blue -rgba.alpha}
+  expr0 "(min((centeredHue > knots0?1:0) , (centeredHue < knots4?1:0))  ?   j == 3 ? t*t*t * -1./6 + t*t * 3./6 +  t * -3./6 + 1 * 1./6 : j == 2 ? t*t*t * 3./6 + t*t * -6./6 + t * 0./6 + 1. *4./6 : j == 1 ? t*t*t * -3./6 + t*t * 3./6 + t * 3./6 + 1. * 1./6 : j == 0 ? t*t*t * 1./6 + t*t * 0./6 + t * 0./6 + 1. * 0./6 : 0   :  0) * 3/2"
+  channel1 none
+  expr1 "min((centeredHue > knots0?1:0) , (centeredHue < knots4?1:0))"
+  channel2 none
+  expr2 int(knot_coord)
+  name cubic_basis_shaper
+  label "line 47"
+  xpos 424
+  ypos 13
+  addUserKnob {20 User}
+  addUserKnob {7 w}
+  w {{parent.widthH}}
+  addUserKnob {7 knots0}
+  knots0 {{-w/2}}
+  addUserKnob {7 knots1}
+  knots1 {{-w/4}}
+  addUserKnob {7 knots2}
+  addUserKnob {7 knots3}
+  knots3 {{w/4}}
+  addUserKnob {7 knots4}
+  knots4 {{w/2}}
+ }
+ Dot {
+  name Dot1
+  label "f_H\n"
+  xpos 458
+  ypos 61
+ }
+set N68285000 [stack 0]
+ Expression {
+  channel0 rgba
+  expr0 b>0
+  name Expression3
+  xpos 424
+  ypos 121
+ }
+push $N68285000
+push $N68285800
+ Dot {
+  name Dot2
+  label old_hue
+  xpos 545
+  ypos 1
+ }
+set N68284800 [stack 0]
+ Add {
+  value {{parent.degreesShift}}
+  name new_hue
+  xpos 574
+  ypos 22
+ }
+set N68284400 [stack 0]
+push $N68284800
+ Keymix {
+  inputs 3
+  maskChannel rgba.blue
+  name Keymix1
+  xpos 511
+  ypos 75
+ }
+set N68284000 [stack 0]
+push $Nba896000
+ Copy {
+  inputs 2
+  from2 rgba.blue
+  to2 rgba.blue
+  name Copy1
+  xpos 620
+  ypos 85
+ }
+ Expression {
+  temp_name0 hue
+  temp_expr0 "b + centerH"
+  temp_name1 l1
+  temp_expr1 "hue < 0 ? hue + 360 : hue"
+  temp_name2 l2
+  temp_expr2 "l1 > 360 ?l1 - 360:l1"
+  expr2 l2
+  name uncenter_hue1
+  xpos 620
+  ypos 127
+  addUserKnob {20 User}
+  addUserKnob {7 centerH R 0 360}
+  centerH {{parent.centerH}}
+ }
+push $Nba896000
+ Keymix {
+  inputs 3
+  name Keymix2
+  xpos 588
+  ypos 162
+ }
+ Expression {
+  temp_name0 M_PI
+  temp_expr0 3.14159265358979323846264338327950288
+  temp_name1 h
+  temp_expr1 "b * (M_PI / 180.0)"
+  expr1 g*cos(h)
+  expr2 g*sin(h)
+  name Expression2
+  label ych_2_yab
+  xpos 592
+  ypos 202
+ }
+ ColorMatrix {
+  matrix {
+      {{1/3} {1/3} {1/3}}
+      {{1/2} {-1/4} {-1/4}}
+      {0 {sqrt3over4} {-sqrt3over4}}
+    }
+  invert true
+  name ColorMatrix2
+  label rgb_2_yab
+  xpos 607
+  ypos 236
+  addUserKnob {20 User}
+  addUserKnob {7 sqrt3over4 t sqrt(3.)/4}
+  sqrt3over4 0.4330127019
+ }
+ Output {
+  name Output1
+  xpos 607
+  ypos 286
+ }
+push $N68284400
+push $N68284000
+ Viewer {
+  inputs 2
+  frame_range 1-100
+  colour_sample_bbox {-0.6447916627 0.1958333403 -0.6437500119 0.196875006}
+  viewerProcess "sRGB (ACES)"
+  name Viewer1
+  xpos 651
+  ypos -18
+ }
+end_group
+Group {
+ name rotate_H_in_H3
+ label "centerH: \[value centerH]\nwidthH: \[value widthH]\ndegressShift: \[value degreesShift]"
+ xpos 347
+ ypos 261
+ addUserKnob {20 User}
+ addUserKnob {7 centerH R 0 360}
+ centerH 45
+ addUserKnob {7 widthH R 0 360}
+ widthH 40
+ addUserKnob {7 degreesShift R -180 180}
+ degreesShift 1.4
+}
+ StickyNote {
+  inputs 0
+  name StickyNote1
+  label "type note hereconst float RGB_2_YAB_MAT\[3]\[3] = \{\n  \{1./3., 1./2., 0.0\},\n  \{1./3., -1./4.,  sqrt3over4\},\n  \{1./3., -1./4., -sqrt3over4\}\n\};"
+  xpos 651
+  ypos -244
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote2
+  label "<justify=left>float\[3] yab_2_ych( float yab\[3])\n\{\n  float ych\[3] = yab;\n\n  ych\[1] = sqrt( pow( yab\[1], 2.) + pow( yab\[2], 2.) );\n\n  ych\[2] = atan2( yab\[2], yab\[1] ) * (180.0 / M_PI);\n  if (ych\[2] < 0.0) ych\[2] = ych\[2] + 360.;\n\n  return ych;\n\}"
+  xpos 648
+  ypos -186
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote3
+  label "float\[3] ych_2_yab( float ych\[3] ) \n\{\n  float yab\[3];\n  yab\[0] = ych\[0];\n\n  float h = ych\[2] * (M_PI / 180.0);\n  yab\[1] = ych\[1]*cos(h);\n  yab\[2] = ych\[1]*sin(h);\n\n  return yab;\n\}"
+  xpos 694
+  ypos -34
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote4
+  label "<justify=left>float center_hue( float hue, float centerH)\n\{\n  float hueCentered = hue - centerH;\n  if (hueCentered < -180.) hueCentered = hueCentered + 360.;\n  else if (hueCentered > 180.) hueCentered = hueCentered - 360.;\n  return hueCentered;\n\}"
+  xpos 864
+  ypos 5
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote5
+  label "<justift=left>float uncenter_hue( float hueCentered, float centerH)\n\{\n  float hue = hueCentered + centerH;\n  if (hue < 0.) hue = hue + 360.;\n  else if (hue > 360.) hue = hue - 360.;\n  return hue;\n\}\n"
+  xpos 829
+  ypos 114
+ }
+ Input {
+  inputs 0
+  name Input1
+  xpos 556
+  ypos -180
+ }
+ ColorMatrix {
+  matrix {
+      {{1/3} {1/3} {1/3}}
+      {{1/2} {-1/4} {-1/4}}
+      {0 {sqrt3over4} {-sqrt3over4}}
+    }
+  name ColorMatrix1
+  label rgb_2_yab
+  xpos 556
+  ypos -143
+  addUserKnob {20 User}
+  addUserKnob {7 sqrt3over4 t sqrt(3.)/4}
+  sqrt3over4 0.4330127019
+ }
+ Expression {
+  temp_name0 M_PI
+  temp_expr0 3.14159265358979323846264338327950288
+  temp_name1 ych2
+  temp_expr1 "(180.0 / M_PI) * atan2( b, g )"
+  expr0 r
+  expr1 "sqrt( pow( g, 2) + pow( b, 2) )"
+  channel2 {-rgba.red rgba.green rgba.blue none}
+  expr2 "ych2 < 0.0?ych2 + 360:ych2"
+  name Expression1
+  label yab_2_ych
+  xpos 556
+  ypos -114
+ }
+set N91236800 [stack 0]
+ Expression {
+  temp_name0 hueCentered
+  temp_expr0 "b - centerH"
+  temp_name1 l1
+  temp_expr1 "(hueCentered < -180.)?hueCentered + 360 : hueCentered"
+  temp_name2 l2
+  temp_expr2 "(l1 > 180.)?l1 - 360 : l1"
+  expr2 l2
+  name center_hue
+  xpos 481
+  ypos -76
+  addUserKnob {20 User}
+  addUserKnob {7 centerH R 0 360}
+  centerH {{parent.centerH}}
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  fromInput2 {{0} B}
+  mappings "4 rgba.blue 0 2 rgba.blue 0 2 rgba.alpha 0 3 rgba.alpha 0 3 rgba.blue 0 2 rgba.green 0 1 rgba.blue 0 2 rgba.red 0 0"
+  name Shuffle1
+  xpos 424
+  ypos -33
+ }
+set N91236000 [stack 0]
+ Expression {
+  temp_name0 centeredHue
+  temp_expr0 g
+  temp_name1 knot_coord
+  temp_expr1 "(centeredHue - knots0) * 4.0/\[value w]"
+  temp_name2 j
+  temp_expr2 int(knot_coord)
+  temp_name3 t
+  temp_expr3 "knot_coord - j"
+  channel0 {-rgba.red -rgba.green rgba.blue -rgba.alpha}
+  expr0 "(min((centeredHue > knots0?1:0) , (centeredHue < knots4?1:0))  ?   j == 3 ? t*t*t * -1./6 + t*t * 3./6 +  t * -3./6 + 1 * 1./6 : j == 2 ? t*t*t * 3./6 + t*t * -6./6 + t * 0./6 + 1. *4./6 : j == 1 ? t*t*t * -3./6 + t*t * 3./6 + t * 3./6 + 1. * 1./6 : j == 0 ? t*t*t * 1./6 + t*t * 0./6 + t * 0./6 + 1. * 0./6 : 0   :  0) * 3/2"
+  channel1 none
+  expr1 "min((centeredHue > knots0?1:0) , (centeredHue < knots4?1:0))"
+  channel2 none
+  expr2 int(knot_coord)
+  name cubic_basis_shaper
+  label "line 47"
+  xpos 424
+  ypos 13
+  addUserKnob {20 User}
+  addUserKnob {7 w}
+  w {{parent.widthH}}
+  addUserKnob {7 knots0}
+  knots0 {{-w/2}}
+  addUserKnob {7 knots1}
+  knots1 {{-w/4}}
+  addUserKnob {7 knots2}
+  addUserKnob {7 knots3}
+  knots3 {{w/4}}
+  addUserKnob {7 knots4}
+  knots4 {{w/2}}
+ }
+ Dot {
+  name Dot1
+  label "f_H\n"
+  xpos 458
+  ypos 61
+ }
+set N9a19b800 [stack 0]
+ Expression {
+  channel0 rgba
+  expr0 b>0
+  name Expression3
+  xpos 424
+  ypos 121
+ }
+push $N9a19b800
+push $N91236000
+ Dot {
+  name Dot2
+  label old_hue
+  xpos 545
+  ypos 1
+ }
+set N9a19b000 [stack 0]
+ Add {
+  value {{parent.degreesShift}}
+  name new_hue
+  xpos 574
+  ypos 22
+ }
+set N9a19ac00 [stack 0]
+push $N9a19b000
+ Keymix {
+  inputs 3
+  maskChannel rgba.blue
+  name Keymix1
+  xpos 511
+  ypos 75
+ }
+set N9a19a800 [stack 0]
+push $N91236800
+ Copy {
+  inputs 2
+  from2 rgba.blue
+  to2 rgba.blue
+  name Copy1
+  xpos 620
+  ypos 85
+ }
+ Expression {
+  temp_name0 hue
+  temp_expr0 "b + centerH"
+  temp_name1 l1
+  temp_expr1 "hue < 0 ? hue + 360 : hue"
+  temp_name2 l2
+  temp_expr2 "l1 > 360 ?l1 - 360:l1"
+  expr2 l2
+  name uncenter_hue1
+  xpos 620
+  ypos 127
+  addUserKnob {20 User}
+  addUserKnob {7 centerH R 0 360}
+  centerH {{parent.centerH}}
+ }
+push $N91236800
+ Keymix {
+  inputs 3
+  name Keymix2
+  xpos 588
+  ypos 162
+ }
+ Expression {
+  temp_name0 M_PI
+  temp_expr0 3.14159265358979323846264338327950288
+  temp_name1 h
+  temp_expr1 "b * (M_PI / 180.0)"
+  expr1 g*cos(h)
+  expr2 g*sin(h)
+  name Expression2
+  label ych_2_yab
+  xpos 592
+  ypos 202
+ }
+ ColorMatrix {
+  matrix {
+      {{1/3} {1/3} {1/3}}
+      {{1/2} {-1/4} {-1/4}}
+      {0 {sqrt3over4} {-sqrt3over4}}
+    }
+  invert true
+  name ColorMatrix2
+  label rgb_2_yab
+  xpos 607
+  ypos 236
+  addUserKnob {20 User}
+  addUserKnob {7 sqrt3over4 t sqrt(3.)/4}
+  sqrt3over4 0.4330127019
+ }
+ Output {
+  name Output1
+  xpos 607
+  ypos 286
+ }
+push $N9a19ac00
+push $N9a19a800
+ Viewer {
+  inputs 2
+  frame_range 1-100
+  colour_sample_bbox {-0.6447916627 0.1958333403 -0.6437500119 0.196875006}
+  viewerProcess "sRGB (ACES)"
+  name Viewer1
+  xpos 651
+  ypos -18
+ }
+end_group
+Group {
+ name rotate_H_in_H4
+ label "centerH: \[value centerH]\nwidthH: \[value widthH]\ndegressShift: \[value degreesShift]"
+ xpos 347
+ ypos 313
+ addUserKnob {20 User}
+ addUserKnob {7 centerH R 0 360}
+ centerH 190
+ addUserKnob {7 widthH R 0 360}
+ widthH 40
+ addUserKnob {7 degreesShift R -180 180}
+ degreesShift 30
+}
+ StickyNote {
+  inputs 0
+  name StickyNote1
+  label "type note hereconst float RGB_2_YAB_MAT\[3]\[3] = \{\n  \{1./3., 1./2., 0.0\},\n  \{1./3., -1./4.,  sqrt3over4\},\n  \{1./3., -1./4., -sqrt3over4\}\n\};"
+  xpos 651
+  ypos -244
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote2
+  label "<justify=left>float\[3] yab_2_ych( float yab\[3])\n\{\n  float ych\[3] = yab;\n\n  ych\[1] = sqrt( pow( yab\[1], 2.) + pow( yab\[2], 2.) );\n\n  ych\[2] = atan2( yab\[2], yab\[1] ) * (180.0 / M_PI);\n  if (ych\[2] < 0.0) ych\[2] = ych\[2] + 360.;\n\n  return ych;\n\}"
+  xpos 648
+  ypos -186
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote3
+  label "float\[3] ych_2_yab( float ych\[3] ) \n\{\n  float yab\[3];\n  yab\[0] = ych\[0];\n\n  float h = ych\[2] * (M_PI / 180.0);\n  yab\[1] = ych\[1]*cos(h);\n  yab\[2] = ych\[1]*sin(h);\n\n  return yab;\n\}"
+  xpos 694
+  ypos -34
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote4
+  label "<justify=left>float center_hue( float hue, float centerH)\n\{\n  float hueCentered = hue - centerH;\n  if (hueCentered < -180.) hueCentered = hueCentered + 360.;\n  else if (hueCentered > 180.) hueCentered = hueCentered - 360.;\n  return hueCentered;\n\}"
+  xpos 864
+  ypos 5
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote5
+  label "<justift=left>float uncenter_hue( float hueCentered, float centerH)\n\{\n  float hue = hueCentered + centerH;\n  if (hue < 0.) hue = hue + 360.;\n  else if (hue > 360.) hue = hue - 360.;\n  return hue;\n\}\n"
+  xpos 829
+  ypos 114
+ }
+ Input {
+  inputs 0
+  name Input1
+  xpos 556
+  ypos -180
+ }
+ ColorMatrix {
+  matrix {
+      {{1/3} {1/3} {1/3}}
+      {{1/2} {-1/4} {-1/4}}
+      {0 {sqrt3over4} {-sqrt3over4}}
+    }
+  name ColorMatrix1
+  label rgb_2_yab
+  xpos 556
+  ypos -143
+  addUserKnob {20 User}
+  addUserKnob {7 sqrt3over4 t sqrt(3.)/4}
+  sqrt3over4 0.4330127019
+ }
+ Expression {
+  temp_name0 M_PI
+  temp_expr0 3.14159265358979323846264338327950288
+  temp_name1 ych2
+  temp_expr1 "(180.0 / M_PI) * atan2( b, g )"
+  expr0 r
+  expr1 "sqrt( pow( g, 2) + pow( b, 2) )"
+  channel2 {-rgba.red rgba.green rgba.blue none}
+  expr2 "ych2 < 0.0?ych2 + 360:ych2"
+  name Expression1
+  label yab_2_ych
+  xpos 556
+  ypos -114
+ }
+set N1c7ef000 [stack 0]
+ Expression {
+  temp_name0 hueCentered
+  temp_expr0 "b - centerH"
+  temp_name1 l1
+  temp_expr1 "(hueCentered < -180.)?hueCentered + 360 : hueCentered"
+  temp_name2 l2
+  temp_expr2 "(l1 > 180.)?l1 - 360 : l1"
+  expr2 l2
+  name center_hue
+  xpos 481
+  ypos -76
+  addUserKnob {20 User}
+  addUserKnob {7 centerH R 0 360}
+  centerH {{parent.centerH}}
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  fromInput2 {{0} B}
+  mappings "4 rgba.blue 0 2 rgba.blue 0 2 rgba.alpha 0 3 rgba.alpha 0 3 rgba.blue 0 2 rgba.green 0 1 rgba.blue 0 2 rgba.red 0 0"
+  name Shuffle1
+  xpos 424
+  ypos -33
+ }
+set N1c7ee800 [stack 0]
+ Expression {
+  temp_name0 centeredHue
+  temp_expr0 g
+  temp_name1 knot_coord
+  temp_expr1 "(centeredHue - knots0) * 4.0/\[value w]"
+  temp_name2 j
+  temp_expr2 int(knot_coord)
+  temp_name3 t
+  temp_expr3 "knot_coord - j"
+  channel0 {-rgba.red -rgba.green rgba.blue -rgba.alpha}
+  expr0 "(min((centeredHue > knots0?1:0) , (centeredHue < knots4?1:0))  ?   j == 3 ? t*t*t * -1./6 + t*t * 3./6 +  t * -3./6 + 1 * 1./6 : j == 2 ? t*t*t * 3./6 + t*t * -6./6 + t * 0./6 + 1. *4./6 : j == 1 ? t*t*t * -3./6 + t*t * 3./6 + t * 3./6 + 1. * 1./6 : j == 0 ? t*t*t * 1./6 + t*t * 0./6 + t * 0./6 + 1. * 0./6 : 0   :  0) * 3/2"
+  channel1 none
+  expr1 "min((centeredHue > knots0?1:0) , (centeredHue < knots4?1:0))"
+  channel2 none
+  expr2 int(knot_coord)
+  name cubic_basis_shaper
+  label "line 47"
+  xpos 424
+  ypos 13
+  addUserKnob {20 User}
+  addUserKnob {7 w}
+  w {{parent.widthH}}
+  addUserKnob {7 knots0}
+  knots0 {{-w/2}}
+  addUserKnob {7 knots1}
+  knots1 {{-w/4}}
+  addUserKnob {7 knots2}
+  addUserKnob {7 knots3}
+  knots3 {{w/4}}
+  addUserKnob {7 knots4}
+  knots4 {{w/2}}
+ }
+ Dot {
+  name Dot1
+  label "f_H\n"
+  xpos 458
+  ypos 61
+ }
+set N1c7ee000 [stack 0]
+ Expression {
+  channel0 rgba
+  expr0 b>0
+  name Expression3
+  xpos 424
+  ypos 121
+ }
+push $N1c7ee000
+push $N1c7ee800
+ Dot {
+  name Dot2
+  label old_hue
+  xpos 545
+  ypos 1
+ }
+set N96e05800 [stack 0]
+ Add {
+  value {{parent.degreesShift}}
+  name new_hue
+  xpos 574
+  ypos 22
+ }
+set N96e05400 [stack 0]
+push $N96e05800
+ Keymix {
+  inputs 3
+  maskChannel rgba.blue
+  name Keymix1
+  xpos 511
+  ypos 75
+ }
+set N96e05000 [stack 0]
+push $N1c7ef000
+ Copy {
+  inputs 2
+  from2 rgba.blue
+  to2 rgba.blue
+  name Copy1
+  xpos 620
+  ypos 85
+ }
+ Expression {
+  temp_name0 hue
+  temp_expr0 "b + centerH"
+  temp_name1 l1
+  temp_expr1 "hue < 0 ? hue + 360 : hue"
+  temp_name2 l2
+  temp_expr2 "l1 > 360 ?l1 - 360:l1"
+  expr2 l2
+  name uncenter_hue1
+  xpos 620
+  ypos 127
+  addUserKnob {20 User}
+  addUserKnob {7 centerH R 0 360}
+  centerH {{parent.centerH}}
+ }
+push $N1c7ef000
+ Keymix {
+  inputs 3
+  name Keymix2
+  xpos 588
+  ypos 162
+ }
+ Expression {
+  temp_name0 M_PI
+  temp_expr0 3.14159265358979323846264338327950288
+  temp_name1 h
+  temp_expr1 "b * (M_PI / 180.0)"
+  expr1 g*cos(h)
+  expr2 g*sin(h)
+  name Expression2
+  label ych_2_yab
+  xpos 592
+  ypos 202
+ }
+ ColorMatrix {
+  matrix {
+      {{1/3} {1/3} {1/3}}
+      {{1/2} {-1/4} {-1/4}}
+      {0 {sqrt3over4} {-sqrt3over4}}
+    }
+  invert true
+  name ColorMatrix2
+  label rgb_2_yab
+  xpos 607
+  ypos 236
+  addUserKnob {20 User}
+  addUserKnob {7 sqrt3over4 t sqrt(3.)/4}
+  sqrt3over4 0.4330127019
+ }
+ Output {
+  name Output1
+  xpos 607
+  ypos 286
+ }
+push $N96e05400
+push $N96e05000
+ Viewer {
+  inputs 2
+  frame_range 1-100
+  colour_sample_bbox {-0.6447916627 0.1958333403 -0.6437500119 0.196875006}
+  viewerProcess "sRGB (ACES)"
+  name Viewer1
+  xpos 651
+  ypos -18
+ }
+end_group
+Group {
+ name rotate_H_in_H5
+ label "centerH: \[value centerH]\nwidthH: \[value widthH]\ndegressShift: \[value degreesShift]"
+ xpos 347
+ ypos 365
+ addUserKnob {20 User}
+ addUserKnob {7 centerH R 0 360}
+ centerH 240
+ addUserKnob {7 widthH R 0 360}
+ widthH 120
+ addUserKnob {7 degreesShift R -180 180}
+ degreesShift 1.4
+}
+ StickyNote {
+  inputs 0
+  name StickyNote1
+  label "type note hereconst float RGB_2_YAB_MAT\[3]\[3] = \{\n  \{1./3., 1./2., 0.0\},\n  \{1./3., -1./4.,  sqrt3over4\},\n  \{1./3., -1./4., -sqrt3over4\}\n\};"
+  xpos 651
+  ypos -244
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote2
+  label "<justify=left>float\[3] yab_2_ych( float yab\[3])\n\{\n  float ych\[3] = yab;\n\n  ych\[1] = sqrt( pow( yab\[1], 2.) + pow( yab\[2], 2.) );\n\n  ych\[2] = atan2( yab\[2], yab\[1] ) * (180.0 / M_PI);\n  if (ych\[2] < 0.0) ych\[2] = ych\[2] + 360.;\n\n  return ych;\n\}"
+  xpos 648
+  ypos -186
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote3
+  label "float\[3] ych_2_yab( float ych\[3] ) \n\{\n  float yab\[3];\n  yab\[0] = ych\[0];\n\n  float h = ych\[2] * (M_PI / 180.0);\n  yab\[1] = ych\[1]*cos(h);\n  yab\[2] = ych\[1]*sin(h);\n\n  return yab;\n\}"
+  xpos 694
+  ypos -34
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote4
+  label "<justify=left>float center_hue( float hue, float centerH)\n\{\n  float hueCentered = hue - centerH;\n  if (hueCentered < -180.) hueCentered = hueCentered + 360.;\n  else if (hueCentered > 180.) hueCentered = hueCentered - 360.;\n  return hueCentered;\n\}"
+  xpos 864
+  ypos 5
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote5
+  label "<justift=left>float uncenter_hue( float hueCentered, float centerH)\n\{\n  float hue = hueCentered + centerH;\n  if (hue < 0.) hue = hue + 360.;\n  else if (hue > 360.) hue = hue - 360.;\n  return hue;\n\}\n"
+  xpos 829
+  ypos 114
+ }
+ Input {
+  inputs 0
+  name Input1
+  xpos 556
+  ypos -180
+ }
+ ColorMatrix {
+  matrix {
+      {{1/3} {1/3} {1/3}}
+      {{1/2} {-1/4} {-1/4}}
+      {0 {sqrt3over4} {-sqrt3over4}}
+    }
+  name ColorMatrix1
+  label rgb_2_yab
+  xpos 556
+  ypos -143
+  addUserKnob {20 User}
+  addUserKnob {7 sqrt3over4 t sqrt(3.)/4}
+  sqrt3over4 0.4330127019
+ }
+ Expression {
+  temp_name0 M_PI
+  temp_expr0 3.14159265358979323846264338327950288
+  temp_name1 ych2
+  temp_expr1 "(180.0 / M_PI) * atan2( b, g )"
+  expr0 r
+  expr1 "sqrt( pow( g, 2) + pow( b, 2) )"
+  channel2 {-rgba.red rgba.green rgba.blue none}
+  expr2 "ych2 < 0.0?ych2 + 360:ych2"
+  name Expression1
+  label yab_2_ych
+  xpos 556
+  ypos -114
+ }
+set N96513800 [stack 0]
+ Expression {
+  temp_name0 hueCentered
+  temp_expr0 "b - centerH"
+  temp_name1 l1
+  temp_expr1 "(hueCentered < -180.)?hueCentered + 360 : hueCentered"
+  temp_name2 l2
+  temp_expr2 "(l1 > 180.)?l1 - 360 : l1"
+  expr2 l2
+  name center_hue
+  xpos 481
+  ypos -76
+  addUserKnob {20 User}
+  addUserKnob {7 centerH R 0 360}
+  centerH {{parent.centerH}}
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  fromInput2 {{0} B}
+  mappings "4 rgba.blue 0 2 rgba.blue 0 2 rgba.alpha 0 3 rgba.alpha 0 3 rgba.blue 0 2 rgba.green 0 1 rgba.blue 0 2 rgba.red 0 0"
+  name Shuffle1
+  xpos 424
+  ypos -33
+ }
+set N96513000 [stack 0]
+ Expression {
+  temp_name0 centeredHue
+  temp_expr0 g
+  temp_name1 knot_coord
+  temp_expr1 "(centeredHue - knots0) * 4.0/\[value w]"
+  temp_name2 j
+  temp_expr2 int(knot_coord)
+  temp_name3 t
+  temp_expr3 "knot_coord - j"
+  channel0 {-rgba.red -rgba.green rgba.blue -rgba.alpha}
+  expr0 "(min((centeredHue > knots0?1:0) , (centeredHue < knots4?1:0))  ?   j == 3 ? t*t*t * -1./6 + t*t * 3./6 +  t * -3./6 + 1 * 1./6 : j == 2 ? t*t*t * 3./6 + t*t * -6./6 + t * 0./6 + 1. *4./6 : j == 1 ? t*t*t * -3./6 + t*t * 3./6 + t * 3./6 + 1. * 1./6 : j == 0 ? t*t*t * 1./6 + t*t * 0./6 + t * 0./6 + 1. * 0./6 : 0   :  0) * 3/2"
+  channel1 none
+  expr1 "min((centeredHue > knots0?1:0) , (centeredHue < knots4?1:0))"
+  channel2 none
+  expr2 int(knot_coord)
+  name cubic_basis_shaper
+  label "line 47"
+  xpos 424
+  ypos 13
+  addUserKnob {20 User}
+  addUserKnob {7 w}
+  w {{parent.widthH}}
+  addUserKnob {7 knots0}
+  knots0 {{-w/2}}
+  addUserKnob {7 knots1}
+  knots1 {{-w/4}}
+  addUserKnob {7 knots2}
+  addUserKnob {7 knots3}
+  knots3 {{w/4}}
+  addUserKnob {7 knots4}
+  knots4 {{w/2}}
+ }
+ Dot {
+  name Dot1
+  label "f_H\n"
+  xpos 458
+  ypos 61
+ }
+set N96512800 [stack 0]
+ Expression {
+  channel0 rgba
+  expr0 b>0
+  name Expression3
+  xpos 424
+  ypos 121
+ }
+push $N96512800
+push $N96513000
+ Dot {
+  name Dot2
+  label old_hue
+  xpos 545
+  ypos 1
+ }
+set N96512000 [stack 0]
+ Add {
+  value {{parent.degreesShift}}
+  name new_hue
+  xpos 574
+  ypos 22
+ }
+set Na323fc00 [stack 0]
+push $N96512000
+ Keymix {
+  inputs 3
+  maskChannel rgba.blue
+  name Keymix1
+  xpos 511
+  ypos 75
+ }
+set Na323f800 [stack 0]
+push $N96513800
+ Copy {
+  inputs 2
+  from2 rgba.blue
+  to2 rgba.blue
+  name Copy1
+  xpos 620
+  ypos 85
+ }
+ Expression {
+  temp_name0 hue
+  temp_expr0 "b + centerH"
+  temp_name1 l1
+  temp_expr1 "hue < 0 ? hue + 360 : hue"
+  temp_name2 l2
+  temp_expr2 "l1 > 360 ?l1 - 360:l1"
+  expr2 l2
+  name uncenter_hue1
+  xpos 620
+  ypos 127
+  addUserKnob {20 User}
+  addUserKnob {7 centerH R 0 360}
+  centerH {{parent.centerH}}
+ }
+push $N96513800
+ Keymix {
+  inputs 3
+  name Keymix2
+  xpos 588
+  ypos 162
+ }
+ Expression {
+  temp_name0 M_PI
+  temp_expr0 3.14159265358979323846264338327950288
+  temp_name1 h
+  temp_expr1 "b * (M_PI / 180.0)"
+  expr1 g*cos(h)
+  expr2 g*sin(h)
+  name Expression2
+  label ych_2_yab
+  xpos 592
+  ypos 202
+ }
+ ColorMatrix {
+  matrix {
+      {{1/3} {1/3} {1/3}}
+      {{1/2} {-1/4} {-1/4}}
+      {0 {sqrt3over4} {-sqrt3over4}}
+    }
+  invert true
+  name ColorMatrix2
+  label rgb_2_yab
+  xpos 607
+  ypos 236
+  addUserKnob {20 User}
+  addUserKnob {7 sqrt3over4 t sqrt(3.)/4}
+  sqrt3over4 0.4330127019
+ }
+ Output {
+  name Output1
+  xpos 607
+  ypos 286
+ }
+push $Na323fc00
+push $Na323f800
+ Viewer {
+  inputs 2
+  frame_range 1-100
+  colour_sample_bbox {-0.6447916627 0.1958333403 -0.6437500119 0.196875006}
+  viewerProcess "sRGB (ACES)"
+  name Viewer1
+  xpos 651
+  ypos -18
+ }
+end_group
+OCIOColorSpace {
+ in_colorspace default
+ out_colorspace rendering
+ name OCIOColorSpace2
+ xpos 347
+ ypos 417
+}
+Rectangle {
+ opacity 0.855
+ area {10.5 6 599.5999756 77}
+ color 0
+ name Rectangle1
+ xpos 257
+ ypos 548
+}
+Text {
+ message LMT.Academy.Analytic_3
+ font /Library/Fonts/Arial.ttf
+ yjustify bottom
+ box {20 14 626 77}
+ center {1024 778}
+ name Text1
+ xpos 257
+ ypos 572
+}
+push $N1c5f2800
+Dot {
+ name Dot1
+ xpos 204
+ ypos -135
+}
+Rectangle {
+ opacity 0.855
+ area {10.5 6 599.5999756 77}
+ color 0
+ name Rectangle2
+ xpos 170
+ ypos 549
+}
+Text {
+ message Base
+ font /Library/Fonts/Arial.ttf
+ yjustify bottom
+ box {20 14 626 77}
+ center {1024 778}
+ name Text2
+ xpos 170
+ ypos 573
+}
+ContactSheet {
+ inputs 2
+ width 1944
+ height 556
+ rows 1
+ columns 2
+ gap 8
+ center true
+ name ContactSheet1
+ xpos 170
+ ypos 624
+}
+Write {
+ file ../images/LMT.Academy.Analytic_3_comparison_v001.png
+ colorspace "Output - sRGB"
+ file_type png
+ checkHashOnRead false
+ name Write1
+ xpos 170
+ ypos 648
+}
